@@ -21,6 +21,8 @@ func NewBasicBroker() *BasicBroker {
 }
 
 func (b *BasicBroker) SubscribeToEvent(name string, observers []Observer) error {
+	// нет возможности добавлять в режиме runtime дополнительных слушателей
+	// сделано для того, чтобы исключить использование mutex во избежание тормозов
 	if _, ok := b.subGroups[name]; ok {
 		return errors.New("group exist")
 	}
