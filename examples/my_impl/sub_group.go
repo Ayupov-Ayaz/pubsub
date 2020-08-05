@@ -4,14 +4,9 @@ import (
 	"runtime"
 )
 
-type SubGroup struct {
-	publish   chan Event
-	observers []Observer
-}
-
-func (g *SubGroup) sendingMessages() {
-	for e := range g.publish {
-		for _, o := range g.observers {
+func sendingMessages(publish <-chan Event, observers []Observer) {
+	for e := range publish {
+		for _, o := range observers {
 			o.Notify(e)
 		}
 	}
@@ -22,12 +17,7 @@ func NewSubGroup(observers []Observer) chan<- Event {
 	// сделано для того, чтобы исключить использование mutex во избежание тормозов
 	ch := make(chan Event, runtime.NumCPU()*2)
 
-	g := &SubGroup{
-		publish:   ch,
-		observers: observers,
-	}
-
-	go g.sendingMessages()
+	go sendingMessages(ch, observers)
 
 	return ch
 }
